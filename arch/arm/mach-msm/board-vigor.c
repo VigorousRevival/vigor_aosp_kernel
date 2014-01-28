@@ -35,6 +35,7 @@
 #include <linux/atmel_qt602240.h>
 #include <linux/cm3629.h>
 #include <linux/mpu.h>
+#include <linux/memblock.h>
 #include <linux/proc_fs.h>
 #include <linux/msm-charger.h>
 #include <linux/i2c.h>
@@ -3046,7 +3047,6 @@ static int __init fb_size_setup(char *p)
 }
 early_param("fb_size", fb_size_setup);
 
-#ifdef CONFIG_ANDROID_PMEM
 static unsigned pmem_adsp_size = MSM_PMEM_ADSP_SIZE;
 
 static int __init pmem_adsp_size_setup(char *p)
@@ -3064,7 +3064,6 @@ static int __init pmem_audio_size_setup(char *p)
         return 0;
 }
 early_param("pmem_audio_size", pmem_audio_size_setup);
-#endif
 
 static struct resource msm_fb_resources[] = {
         {
@@ -3076,7 +3075,6 @@ static struct resource msm_fb_resources[] = {
         },
 };
 
-#ifdef CONFIG_ANDROID_PMEM
 static struct android_pmem_platform_data android_pmem_adsp_pdata = {
         .name = "pmem_adsp",
         .allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
@@ -3141,8 +3139,6 @@ void *pmem_setup_smi_region(void)
         return (void *)msm_bus_scale_register_client(&smi_client_pdata);
 }
 
-#ifdef CONFIG_ION_MSM
-#ifdef CONFIG_MSM_MULTIMEDIA_USE_ION
 static int request_smi_region(void *data)
 {
         pmem_request_smi_region(data);
@@ -3158,11 +3154,16 @@ static int release_smi_region(void *data)
 }
 
 static struct ion_cp_heap_pdata cp_mm_ion_pdata = {
-        .permission_type = IPT_TYPE_MM_CARVEOUT,
-        .align = PAGE_SIZE,
-        .request_region = request_smi_region,
-        .release_region = release_smi_region,
-        .setup_region = pmem_setup_smi_region,
+	.permission_type = IPT_TYPE_MM_CARVEOUT,
+	.align = PAGE_SIZE,
+	.request_region = request_smi_region,
+	.release_region = release_smi_region,
+	.setup_region = pmem_setup_smi_region,
+};
+
+static struct ion_cp_heap_pdata cp_mfc_ion_pdata = {
+	.permission_type = IPT_TYPE_MFC_SHAREDMEM,
+	.align = PAGE_SIZE,
 };
 
 static struct ion_cp_heap_pdata cp_wb_ion_pdata = {
@@ -3180,53 +3181,60 @@ static struct ion_co_heap_pdata co_ion_pdata = {
         .align = PAGE_SIZE,
 };
 
-#endif
 static struct ion_platform_data ion_pdata = {
-        .nr = MSM_ION_HEAP_NUM,
-        .heaps = {
-                {
-                        .id        = ION_SYSTEM_HEAP_ID,
-                        .type        = ION_HEAP_TYPE_SYSTEM,
-                        .name        = ION_VMALLOC_HEAP_NAME,
-                },
-                {
-                        .id        = ION_CP_MM_HEAP_ID,
-                        .type        = ION_HEAP_TYPE_CP,
-                        .name        = ION_MM_HEAP_NAME,
-                        .base        = MSM_ION_MM_BASE,
-                        .size        = MSM_ION_MM_SIZE,
-                        .memory_type = ION_SMI_TYPE,
-                        .extra_data = (void *) &cp_mm_ion_pdata,
-                },
-                {
-                        .id        = ION_MM_FIRMWARE_HEAP_ID,
-                        .type        = ION_HEAP_TYPE_CARVEOUT,
-                        .name        = ION_MM_FIRMWARE_HEAP_NAME,
-                        .base        = MSM_ION_MM_FW_BASE,
-                        .size        = MSM_ION_MM_FW_SIZE,
-                        .memory_type = ION_SMI_TYPE,
-                        .extra_data = (void *) &fw_co_ion_pdata,
-                },
-                {
-                        .id        = ION_SF_HEAP_ID,
-                        .type        = ION_HEAP_TYPE_CARVEOUT,
-                        .name        = ION_SF_HEAP_NAME,
-                        .base        = MSM_ION_SF_BASE,
-                        .size        = MSM_ION_SF_SIZE,
-                        .memory_type = ION_EBI_TYPE,
-                        .extra_data = (void *) &co_ion_pdata,
-                },
-                {
-                        .id        = ION_CP_WB_HEAP_ID,
-                        .type        = ION_HEAP_TYPE_CP,
-                        .name        = ION_WB_HEAP_NAME,
-                        .base        = MSM_ION_WB_BASE,
-                        .size        = MSM_ION_WB_SIZE,
-                        .memory_type = ION_EBI_TYPE,
-                        .extra_data = (void *) &cp_wb_ion_pdata,
-                },
-#endif
-        }
+	.nr = MSM_ION_HEAP_NUM,
+	.heaps = {
+		{
+			.id	= ION_SYSTEM_HEAP_ID,
+			.type	= ION_HEAP_TYPE_SYSTEM,
+			.name	= ION_VMALLOC_HEAP_NAME,
+		},
+		{
+			.id	= ION_MM_FIRMWARE_HEAP_ID,
+			.type	= ION_HEAP_TYPE_CARVEOUT,
+			.name	= ION_MM_FIRMWARE_HEAP_NAME,
+			.base	= MSM_ION_MM_FW_BASE,
+			.size	= MSM_ION_MM_FW_SIZE,
+			.memory_type = ION_SMI_TYPE,
+			.extra_data = (void *) &fw_co_ion_pdata,
+		},
+		{
+			.id	= ION_CP_MM_HEAP_ID,
+			.type	= ION_HEAP_TYPE_CP,
+			.name	= ION_MM_HEAP_NAME,
+			.base	= MSM_ION_MM_BASE,
+			.size	= MSM_ION_MM_SIZE,
+			.memory_type = ION_SMI_TYPE,
+			.extra_data = (void *) &cp_mm_ion_pdata,
+		},
+		{
+			.id	= ION_CP_MFC_HEAP_ID,
+			.type	= ION_HEAP_TYPE_CP,
+			.name	= ION_MFC_HEAP_NAME,
+			.base   = MSM_ION_MFC_BASE,
+			.size	= MSM_ION_MFC_SIZE,
+			.memory_type = ION_SMI_TYPE,
+			.extra_data = (void *) &cp_mfc_ion_pdata,
+		},
+		{
+			.id	= ION_CP_WB_HEAP_ID,
+			.type	= ION_HEAP_TYPE_CP,
+			.name	= ION_WB_HEAP_NAME,
+			.base	= MSM_ION_WB_BASE,
+			.size	= MSM_ION_WB_SIZE,
+			.memory_type = ION_EBI_TYPE,
+			.extra_data = (void *) &cp_wb_ion_pdata,
+		},
+		{
+			.id	= ION_SF_HEAP_ID,
+			.type	= ION_HEAP_TYPE_CARVEOUT,
+			.name	= ION_SF_HEAP_NAME,
+			.base	= MSM_ION_SF_BASE,
+			.size	= MSM_ION_SF_SIZE,
+			.memory_type = ION_EBI_TYPE,
+			.extra_data = (void *) &co_ion_pdata,
+		},
+	}
 };
 
 static struct platform_device ion_dev = {
@@ -3234,7 +3242,6 @@ static struct platform_device ion_dev = {
         .id = 1,
         .dev = { .platform_data = &ion_pdata },
 };
-#endif
 
 #ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL
 static struct resource hdmi_msm_resources[] = {
@@ -3296,15 +3303,13 @@ static struct platform_device android_pmem_smipool_device = {
 
 static void __init msm8x60_allocate_memory_regions(void)
 {
-		void *addr;
 	unsigned long size;
 
         size = MSM_FB_SIZE;
-        addr = alloc_bootmem_align(size, 0x1000);
-        msm_fb_resources[0].start = __pa(addr);
+	msm_fb_resources[0].start = MSM_FB_BASE;
         msm_fb_resources[0].end = msm_fb_resources[0].start + size - 1;
-        pr_info("allocating %lu bytes at %p (%lx physical) for fb\n",
-                size, addr, __pa(addr));
+	pr_info("allocating %lu bytes at 0x%p (0x%lx physical) for fb\n",
+	size, __va(MSM_FB_BASE), (unsigned long) MSM_FB_BASE);
 }
 
 
@@ -7653,14 +7658,12 @@ static void __init size_pmem_device(struct android_pmem_platform_data *pdata, un
 
 static void __init size_pmem_devices(void)
 {
-#ifdef CONFIG_ANDROID_PMEM
 	size_pmem_device(&android_pmem_adsp_pdata, MSM_PMEM_ADSP_BASE, pmem_adsp_size);
-	size_pmem_device(&android_pmem_smipool_pdata, MSM_PMEM_SMIPOOL_BASE, MSM_PMEM_SMIPOOL_SIZE);
-	size_pmem_device(&android_pmem_audio_pdata, MSM_PMEM_AUDIO_BASE, pmem_audio_size);
-#endif
+	size_pmem_device(&android_pmem_smipool_pdata, USER_SMI_BASE, USER_SMI_SIZE);
+	size_pmem_device(&android_pmem_audio_pdata, MSM_PMEM_AUDIO_BASE, MSM_PMEM_AUDIO_SIZE);
 }
 
-#ifdef CONFIG_ANDROID_PMEM
+
 static void __init reserve_memory_for(struct android_pmem_platform_data *p)
 {
 	if (p->start == 0) {
@@ -7668,30 +7671,29 @@ static void __init reserve_memory_for(struct android_pmem_platform_data *p)
 		msm8x60_reserve_table[p->memory_type].size += p->size;
 	}
 }
-#endif
+
 
 static void __init reserve_pmem_memory(void)
 {
-#ifdef CONFIG_ANDROID_PMEM
 	reserve_memory_for(&android_pmem_adsp_pdata);
 	reserve_memory_for(&android_pmem_smipool_pdata);
 	reserve_memory_for(&android_pmem_audio_pdata);
-#endif
 }
 
 static void __init reserve_ion_memory(void)
 {
-//Do Nothing
+  int ret;
+  ret = memblock_remove(MSM_ION_SF_BASE, MSM_ION_SF_SIZE);
+  BUG_ON(ret);
 }
 
-#ifdef CONFIG_ION_MSM
+
 static void __init msm8x60_calculate_reserve_sizes(void)
 {
 	size_pmem_devices();
 	reserve_pmem_memory();
 	reserve_ion_memory();
 }
-#endif
 
 static int msm8x60_paddr_to_memtype(phys_addr_t paddr)
 {
