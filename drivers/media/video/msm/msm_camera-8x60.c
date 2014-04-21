@@ -282,7 +282,7 @@ static void msm_enqueue_vpe(struct msm_device_queue *queue,
 			break;		\
 		}		\
 		if (qcmd) {					\
-			if ((&qcmd->member) && (&qcmd->member.next))	{\
+			if (&qcmd->member)	{\
 				pr_info("[CAM] %s, qcmd->member.next= 0x%p\n", __func__, qcmd->member.next);	\
 				list_del_init(&qcmd->member);		\
 			}				\
@@ -1078,7 +1078,7 @@ static int msm_control(struct msm_control_device *ctrl_pmsm,
 		qcmd_resp = __msm_control_nb(sync, qcmd);
 		goto end;
 	}
-
+	msm_queue_drain(&ctrl_pmsm->ctrl_q, list_control);
 	qcmd_resp = __msm_control(sync,
 				  &ctrl_pmsm->ctrl_q,
 				  qcmd, MAX_SCHEDULE_TIMEOUT);
@@ -4151,6 +4151,14 @@ static int msm_open_common(struct inode *inode, struct file *filep,
 	return rc;
 }
 
+static int msm_open_frame(struct inode *inode, struct file *filep)
+{
+	struct msm_cam_device *pmsm =
+		container_of(inode->i_cdev, struct msm_cam_device, cdev);
+	msm_queue_drain(&pmsm->sync->frame_q, list_frame);
+	return msm_open_common(inode, filep, 1, 0);
+}
+
 static int msm_open(struct inode *inode, struct file *filep)
 {
 	return msm_open_common(inode, filep, 1, 0);
@@ -4246,7 +4254,7 @@ static const struct file_operations msm_fops_control = {
 
 static const struct file_operations msm_fops_frame = {
 	.owner = THIS_MODULE,
-	.open = msm_open,
+	.open = msm_open_frame,
 	.unlocked_ioctl = msm_ioctl_frame,
 	.release = msm_release_frame,
 	.poll = msm_poll_frame,
