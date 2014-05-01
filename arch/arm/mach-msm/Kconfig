@@ -78,8 +78,6 @@ config ARCH_MSM8X60
 	select MSM_NATIVE_RESTART
 	select CPU_HAS_L2_PMU
 	select MSM_SPM_V1
-	select MSM_PM8X60 if PM
-        select ARM_HAS_SG_CHAIN
 
 config ARCH_MSM8X60_LTE
 	bool "MSM8X60_LTE"
@@ -103,6 +101,7 @@ config ARCH_MSM8960
 	select MSM_AUDIO_QDSP6 if SND_SOC
 	select CPU_HAS_L2_PMU
 	select MSM_SPM_V2
+	select HAS_QDSS
 	select MSM_L2_SPM
 	select MSM_NATIVE_RESTART
         select DONT_MAP_HOLE_AFTER_MEMBANK0
@@ -192,6 +191,14 @@ config  ARCH_MSM_KRAIT
 
 config  MSM_SMP
 	bool
+
+config MSM_MPDEC
+	bool "Enable kernel based mpdecision"
+	depends on MSM_SMP
+	default n
+	help
+	  This enables kernel based multi core control.
+	  (up/down hotplug based on load)
 
 config  ARCH_MSM_SCORPIONMP
 	select ARCH_MSM_SCORPION
@@ -697,7 +704,6 @@ config MACH_PYRAMID
 	depends on ARCH_MSM8X60
 	default n
 	bool "Pyramid"
-	select FB_MSM_MIPI_DSI
 	help
 	  Support for the Pyramid device.
 
@@ -705,7 +711,6 @@ config MACH_SHOOTER
 	depends on ARCH_MSM8X60
 	default n
 	bool "shooter"
-	select FB_MSM_MIPI_DSI
 	help
 	  Support for the Shooter device.
 
@@ -714,7 +719,6 @@ config MACH_SHOOTER_U
         default n
         bool "Shooter_U"
         select SMP_PARALLEL_START
-        select FB_MSM_MIPI_DSI
         help
           Support for the Shooter_U device.
 
@@ -729,8 +733,6 @@ config MACH_SHOOTER_CT
         depends on ARCH_MSM8X60
         default n
         bool "shooter_ct"
-        select SMP_PARALLEL_START
-        select FB_MSM_MIPI_DSI
         help
           Support for the Shooter_CT device.
 
@@ -770,6 +772,13 @@ config MACH_VIGOR
 	bool "Vigor"
 	help
 	  Support for the Vigor device.
+
+config MACH_DOUBLESHOT
+	depends on ARCH_MSM8X60
+	default n
+	bool "Doubleshot"
+	help
+	  Support for the Doubleshot device.
 
 config MACH_RUBY
 	depends on ARCH_MSM8X60
@@ -1603,13 +1612,9 @@ config MSM_DALRPC_TEST
 	help
 	  Exercises DAL RPC calls to QDSP6.
 
-config GPU_OVERCLOCK
-	bool "Enable GPU Overclocking option"
-	default n
-
 config CPU_VOLTAGE_TABLE
 	bool "Enable CPU Voltage Table via sysfs for adjustements"
-	default n
+	default y
 
 if CPU_FREQ_MSM
 
@@ -1623,12 +1628,12 @@ config MSM_CPU_FREQ_SET_MIN_MAX
 config MSM_CPU_FREQ_MAX
 	int "Max CPU Frequency"
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
-	default 384000
+	default 1188000
 
 config MSM_CPU_FREQ_MIN
 	int "Min CPU Frequency"
 	depends on MSM_CPU_FREQ_SET_MIN_MAX
-	default 245760
+	default 192000
 
 endif # CPU_FREQ_MSM
 
@@ -2017,13 +2022,6 @@ config MSM_PIL
 
 	  Say yes to support these devices.
 
-config MSM_PIL_QDSP6V3
-	tristate "QDSP6v3 (Hexagon) Boot Support"
-	depends on MSM_PIL
-	help
-	  Support for booting and shutting down QDSP6v3 processors (hexagon).
-	  The QDSP6 is a low power DSP used in audio software applications.
-
 config MSM_SCM
 	bool "Secure Channel Manager (SCM) support"
 	default n
@@ -2160,10 +2158,6 @@ config MSM_SECURE_IO
 config MSM_NATIVE_RESTART
 	bool
 
-config MSM_PM8X60
-	depends on PM
-	bool
-
 config MSM_BUS_SCALING
 	bool "Bus scaling driver"
 	default n
@@ -2191,21 +2185,41 @@ config MSM_DLOAD_MODE
 		make the kernel reboot on a kernel panic - that must be
 		enabled via another mechanism.
 
-config MSM_JTAG
-	bool "JTAG debug and trace support"
+config HAS_QDSS
+	bool "QDSS Present"
 	help
-	 Add additional support for JTAG kernel debugging and tracing.
+	 Select this if the chip has Qualcomm Debug Subsystem implemented.
+
+config MSM_DEBUG_ACROSS_PC
+	bool "Debug support across power collapse"
+	help
+	  Enables debug state to be saved and restored across power collapse.
+
+config MSM_JTAG_V7
+	depends on CPU_V7 && !HAS_QDSS
+	default y if DEBUG_KERNEL
+	bool "JTAG debug support"
+	select MSM_DEBUG_ACROSS_PC
+	help
+          Add additional support for JTAG kernel debugging.
+
+config MSM_TRACE_ACROSS_PC
+	bool "Trace support across power collapse"
+	help
+	  Enables trace state to be saved and restored across power collapse.
 
 config MSM_ETM
 	tristate "Enable MSM ETM and ETB"
-	depends on ARCH_MSM8X60
-	select MSM_JTAG
+	depends on ARCH_MSM8X60 && !HAS_QDSS
+	select MSM_TRACE_ACROSS_PC
 	help
-	  Enables embedded trace collection on MSM8660
+	  Enables embedded trace collection on Qualcomm v7 CPUs.
 
 config MSM_QDSS
 	bool "Qualcomm Debug Subsystem"
-	select MSM_JTAG
+	depends on HAS_QDSS
+	select MSM_DEBUG_ACROSS_PC
+	select MSM_TRACE_ACROSS_PC
 	help
 	  Enables support for Qualcomm Debug Subsystem.
 

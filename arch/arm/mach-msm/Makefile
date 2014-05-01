@@ -1,6 +1,11 @@
+CFLAGS_scm.o :=$(call as-instr,.arch_extension sec,-DREQUIRES_SEC=1)
+
+obj-y += frandom.o
 obj-y += io.o dma.o memory.o timer.o
 obj-y += clock.o clock-voter.o clock-dummy.o
 obj-y += subsystem_map.o
+obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
+obj-$(CONFIG_MSM_MPDEC) += msm_mpdecision.o
 obj-$(CONFIG_DEBUG_FS) += nohlt.o clock-debug.o
 obj-$(CONFIG_KEXEC) += msm_kexec.o
 
@@ -37,18 +42,22 @@ ifdef CONFIG_ARCH_QSD8X50
 endif
 
 obj-$(CONFIG_SMP) += headsmp.o platsmp.o
-obj-$(CONFIG_HOTPLUG_CPU) += hotplug.o
 
 obj-$(CONFIG_MSM_CPU_AVS) += avs.o
 obj-$(CONFIG_MSM_AVS_HW) += avs_hw.o
 obj-$(CONFIG_CPU_V6) += idle-v6.o
 obj-$(CONFIG_CPU_V7) += idle-v7.o
-obj-$(CONFIG_MSM_JTAG) += jtag.o
+obj-$(CONFIG_MSM_JTAG_V7) += jtag-v7.o
 
-msm-etm-objs := etm.o
+msm-etm-objs := cp14.o etm.o
 obj-$(CONFIG_MSM_ETM) += msm-etm.o
 
-obj-$(CONFIG_MSM_QDSS) += qdss-etb.o qdss-tpiu.o qdss-funnel.o qdss-ptm.o
+ifdef CONFIG_MSM_QDSS
+	obj-y += qdss-debug.o
+	obj-y += qdss-etb.o qdss-tpiu.o
+	obj-y += qdss-funnel.o
+	obj-y += qdss-ptm.o
+endif
 
 ifdef CONFIG_MSM_NONSMD_PACKET_FILTER
 obj-$(CONFIG_MSM_SMD) += htc_port_list_lte.o
@@ -79,7 +88,6 @@ ifdef CONFIG_MSM_PIL
 obj-$(CONFIG_ARCH_MSM8X60) += peripheral-reset.o
 obj-$(CONFIG_ARCH_MSM8960) += peripheral-reset-8960.o
 endif
-obj-$(CONFIG_MSM_PIL_QDSP6V3) += pil-q6v3.o
 obj-$(CONFIG_ARCH_QSD8X50) += sirc.o
 obj-$(CONFIG_ARCH_FSM9XXX) += sirc-fsm9xxx.o
 obj-$(CONFIG_MSM_FIQ_SUPPORT) += fiq_glue.o
@@ -172,7 +180,7 @@ obj-$(CONFIG_MSM_AUDIO_QDSP6) += qdsp6v2/
 obj-$(CONFIG_MSM_HW3D) += hw3d.o
 ifdef CONFIG_PM
 	obj-$(CONFIG_ARCH_MSM8960) += pm-8x60.o
-	obj-$(CONFIG_ARCH_MSM8X60) += pm-8x60.o pm-data.o
+	obj-$(CONFIG_ARCH_MSM8X60) += pm-8x60.o
 	obj-$(CONFIG_ARCH_MSM9615) += pm-8x60.o
 	obj-$(CONFIG_ARCH_QSD8X50) += pm2.o
 	obj-$(CONFIG_ARCH_MSM7X30) += pm2.o arch-init-7x30.o
@@ -182,7 +190,7 @@ ifdef CONFIG_PM
 	obj-$(CONFIG_ARCH_MSM7X01A) += pm.o
 	obj-y += pm-boot.o
 else
-	obj-y += no-pm.o
+	obj-y += no-pm.o hotplug.o
 endif
 obj-y += pwrtest.o
 
@@ -355,13 +363,22 @@ obj-$(CONFIG_MACH_KNIGHT) += htc_bdaddress.o
 obj-$(CONFIG_MACH_PYRAMID) += board-pyramid.o
 obj-$(CONFIG_MACH_PYRAMID) += board-pyramid-keypad.o
 obj-$(CONFIG_MACH_PYRAMID) += board-pyramid-audio.o
-obj-$(CONFIG_MACH_PYRAMID) += board-pyramid-display.o
 obj-$(CONFIG_HTC_BATT_CORE) += htc_battery_core.o
 obj-$(CONFIG_HTC_BATT8x60) += htc_battery_8x60.o
 obj-$(CONFIG_HTC_BATT_8960) += htc_battery_8960.o htc_battery_cell.o
 obj-$(CONFIG_MACH_PYRAMID) += htc_bdaddress.o board-pyramid-rfkill.o
 obj-$(CONFIG_MACH_PYRAMID) += board-pyramid-mmc.o board-pyramid-wifi.o
-obj-$(CONFIG_MACH_SHOOTER) += board-shooter.o board-shooter-display.o
+ifeq ($(CONFIG_ION_MSM),y)
+obj-$(CONFIG_MACH_PYRAMID) += board-pyramid-ion.o
+endif
+obj-$(CONFIG_MACH_DOUBLESHOT) += board-doubleshot.o
+obj-$(CONFIG_MACH_DOUBLESHOT) += board-doubleshot-keypad.o
+obj-$(CONFIG_MACH_DOUBLESHOT) += board-doubleshot-audio.o
+obj-$(CONFIG_MACH_DOUBLESHOT) += board-doubleshot-microp.o
+obj-$(CONFIG_MACH_DOUBLESHOT) += htc_bdaddress.o board-doubleshot-rfkill.o
+obj-$(CONFIG_MACH_DOUBLESHOT) += board-doubleshot-mmc.o board-doubleshot-wifi.o
+obj-$(CONFIG_FORCE_FAST_CHARGE) += fastchg.o
+obj-$(CONFIG_MACH_SHOOTER) += board-shooter.o
 obj-$(CONFIG_MACH_SHOOTER) += board-shooter-keypad.o
 obj-$(CONFIG_MACH_SHOOTER) += board-shooter-audio.o
 obj-$(CONFIG_MACH_SHOOTER) += htc_bdaddress.o board-shooter-rfkill.o
@@ -370,20 +387,20 @@ obj-$(CONFIG_MACH_SHOOTER) += board-shooter-mmc.o board-shooter-wifi.o board-com
 else
 obj-$(CONFIG_MACH_SHOOTER) += board-shooter-mmc.o board-shooter-wifi.o
 endif
-obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter_u.o board-shooter-display.o
-obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter-keypad.o
-obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter-audio.o
-obj-$(CONFIG_MACH_SHOOTER_U) += htc_sleep_clk.o htc_bdaddress.o board-shooter-rfkill.o
-obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter-mmc.o board-shooter-wifi.o
+obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter_u.o
+obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter_u-keypad.o
+obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter_u-audio.o
+obj-$(CONFIG_MACH_SHOOTER_U) += htc_bdaddress.o board-shooter_u-rfkill.o
+obj-$(CONFIG_MACH_SHOOTER_U) += board-shooter_u-mmc.o board-shooter_u-wifi.o
 obj-$(CONFIG_MACH_SHOOTER_K) += board-shooter_k.o
 obj-$(CONFIG_MACH_SHOOTER_K) += board-shooter_k-keypad.o
 obj-$(CONFIG_MACH_SHOOTER_K) += board-shooter_k-audio.o
 obj-$(CONFIG_MACH_SHOOTER_K) += htc_bdaddress.o board-shooter_k-rfkill.o
-obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter_ct.o board-shooter-display.o
-obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter-keypad.o
-obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter-audio.o
-obj-$(CONFIG_MACH_SHOOTER_CT) += htc_bdaddress.o board-shooter-rfkill.o
-obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter-mmc.o board-shooter-wifi.o
+obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter_ct.o
+obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter_ct-keypad.o
+obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter_ct-audio.o
+obj-$(CONFIG_MACH_SHOOTER_CT) += htc_bdaddress.o board-shooter_ct-rfkill.o
+obj-$(CONFIG_MACH_SHOOTER_CT) += board-shooter_ct-mmc.o board-shooter_ct-wifi.o
 
 
 ifeq ($(CONFIG_WIMAX),y)
@@ -412,8 +429,7 @@ obj-$(CONFIG_MACH_VILLEC2) += board-villec2-mmc.o board-villec2-wifi.o
 obj-$(CONFIG_MACH_HOLIDAY) += board-holiday.o mdm.o
 obj-$(CONFIG_MACH_HOLIDAY) += board-holiday-audio.o
 obj-$(CONFIG_MACH_HOLIDAY) += board-holiday-keypad.o
-#obj-$(CONFIG_MACH_HOLIDAY) += htc_bdaddress.o htc_sleep_clk.o board-holiday-rfkill.o htc_fmtx_rfkill.o htc_util.o
-obj-$(CONFIG_MACH_HOLIDAY) += htc_bdaddress.o htc_sleep_clk.o board-holiday-rfkill.o htc_fmtx_rfkill.o
+obj-$(CONFIG_MACH_HOLIDAY) += htc_bdaddress.o htc_sleep_clk.o board-holiday-rfkill.o htc_fmtx_rfkill.o htc_util.o
 obj-$(CONFIG_MACH_HOLIDAY) += board-holiday-mmc.o board-holiday-wifi.o
 obj-$(CONFIG_MACH_VIGOR) += board-vigor.o mdm.o
 obj-$(CONFIG_MACH_VIGOR) += board-vigor-audio.o
@@ -580,7 +596,7 @@ obj-y	+= gpio.o
 endif
 endif
 
-obj-$(CONFIG_MSM_SLEEP_STATS) += idle_stats.o idle_stats_device.o
+obj-$(CONFIG_MSM_SLEEP_STATS) += msm_rq_stats.o idle_stats.o idle_stats_device.o
 obj-$(CONFIG_MSM_SHOW_RESUME_IRQ) += msm_show_resume_irq.o
 obj-$(CONFIG_BT_MSM_PINTEST)  += btpintest.o
 obj-$(CONFIG_MSM_FAKE_BATTERY) += fish_battery.o
@@ -601,5 +617,3 @@ obj-$(CONFIG_MFD_MAX8957) += max8957_gpio.o
 obj-y += display/
 obj-$(CONFIG_MACH_PRIMOTD) += board-primotd-gps.o
 obj-$(CONFIG_HTC_ACCESSORY_ONEWIRE) += htc_onewire.o
-obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
-obj-$(CONFIG_FORCE_FAST_CHARGE) += fastchg.o
