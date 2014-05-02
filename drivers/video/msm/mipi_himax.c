@@ -323,13 +323,15 @@ static char chip_id[2] = {0xB9, 0x00}; /* DTYPE_DCS_READ */
 static struct dsi_cmd_desc himax_chip_id_cmd = {
 	DTYPE_DCS_READ, 1, 0, 1, 5, sizeof(chip_id), chip_id};
 #endif
-static uint32 mipi_himax_manufacture_id(void)
+static uint32 mipi_himax_manufacture_id(struct platform_device *pdev)
 {
 	struct dsi_buf *rp, *tp;
 	struct dsi_cmd_desc *cmd;
 	uint32 *lp;
 	int i;
 	char *cp;
+	struct msm_fb_data_type *mfd;
+	mfd = platform_get_drvdata(pdev);
 
 	tp = &himax_tx_buf;
 	rp = &himax_rx_buf;
@@ -337,7 +339,7 @@ static uint32 mipi_himax_manufacture_id(void)
 	mipi_dsi_buf_init(tp);
 
 	cmd = &himax_manufacture_id_cmd;
-	mipi_dsi_cmds_rx(tp, rp, cmd, 3);
+	mipi_dsi_cmds_rx(mfd, tp, rp, cmd, 3);
 
 
 	cp = (char *)rp->data;
@@ -550,7 +552,7 @@ static int mipi_himax_lcd_on(struct platform_device *pdev)
 		}
 
 		mipi_dsi_cmd_bta_sw_trigger();
-		mipi_himax_manufacture_id();
+		mipi_himax_manufacture_id(pdev);
 	}
 	mutex_unlock(&cmdlock);
 	return 0;
@@ -1208,13 +1210,15 @@ static char chip_id[2] = {0xB9, 0x00}; /* DTYPE_DCS_READ */
 static struct dsi_cmd_desc himax_chip_id_cmd = {
 	DTYPE_DCS_READ, 1, 0, 1, 5, sizeof(chip_id), chip_id};
 #endif
-static uint32 mipi_himax_manufacture_id(void)
+static uint32 mipi_himax_manufacture_id(struct platform_device *pdev)
 {
 	struct dsi_buf *rp, *tp;
 	struct dsi_cmd_desc *cmd;
 	uint32 *lp;
 	int i;
 	char *cp;
+	struct msm_fb_data_type *mfd;
+	mfd = platform_get_drvdata(pdev);
 
 	tp = &himax_tx_buf;
 	rp = &himax_rx_buf;
@@ -1222,7 +1226,7 @@ static uint32 mipi_himax_manufacture_id(void)
 	mipi_dsi_buf_init(tp);
 
 	cmd = &himax_manufacture_id_cmd;
-	mipi_dsi_cmds_rx(tp, rp, cmd, 3);
+	mipi_dsi_cmds_rx(mfd, tp, rp, cmd, 3);
 
 
 	cp = (char *)rp->data;
@@ -1520,7 +1524,7 @@ static int mipi_himax_lcd_on(struct platform_device *pdev)
 		}
 
 		mipi_dsi_cmd_bta_sw_trigger();
-		mipi_himax_manufacture_id();
+		mipi_himax_manufacture_id(pdev);
 	}
 #if defined CONFIG_FB_MSM_SELF_REFRESH
 #ifdef CONFIG_PERFLOCK

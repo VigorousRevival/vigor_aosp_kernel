@@ -203,6 +203,8 @@ struct dsi_buf {
 	dma_addr_t dmap;
 };
 
+#define DTYPE_VSYNC_START	0x01	/* short write, 0 parameter */
+#define DTYPE_HSYNC_START	0x21	/* short write, 0 parameter */
 #define DTYPE_DCS_WRITE		0x05
 #define DTYPE_DCS_WRITE1	0x15
 #define DTYPE_DCS_READ		0x06
@@ -304,7 +306,6 @@ void mipi_dsi_cmd_bta_sw_trigger(void);
 void mipi_dsi_ack_err_status(void);
 void mipi_dsi_set_tear_on(struct msm_fb_data_type *mfd);
 void mipi_dsi_set_tear_off(struct msm_fb_data_type *mfd);
-void mipi_dsi_set_backlight(struct msm_fb_data_type *mfd, int level);
 void mipi_dsi_clk_enable(void);
 void mipi_dsi_clk_disable(void);
 void mipi_dsi_pre_kickoff_action(void);

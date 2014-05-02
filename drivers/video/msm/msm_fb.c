@@ -973,6 +973,24 @@ void msm_fb_set_backlight(struct msm_fb_data_type *mfd, __u32 bkl_lvl)
 	}
 }
 
+void msm_fb_display_on(struct msm_fb_data_type *mfd)
+{
+	struct msm_fb_panel_data *pdata;
+	pdata = (struct msm_fb_panel_data *)mfd->pdev->dev.platform_data;
+
+	if ((pdata) && (pdata->display_on)) {
+		down(&mfd->sem);
+		pdata->display_on(mfd);
+		up(&mfd->sem);
+		if (pdata->bklctrl)
+			pdata->bklctrl(1);
+		if (pdata->bklswitch)
+			pdata->bklswitch(mfd, 1);
+		if (pdata->bklenable)
+			pdata->bklenable(mfd);
+	}
+}
+
 static int msm_fb_blank_sub(int blank_mode, struct fb_info *info,
 			    boolean op_enable)
 {

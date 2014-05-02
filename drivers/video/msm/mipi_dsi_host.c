@@ -718,6 +718,43 @@ static int mipi_dsi_blank_pkt(struct dsi_buf *dp, struct dsi_cmd_desc *cm)
 	return dp->len;	
 }
 
+/* Added for ESD fixup. Need to evaluate further to see if it does any impact.
+*/
+static int mipi_dsi_vsync_start(struct dsi_buf *dp, struct dsi_cmd_desc *cm)
+{
+	uint32 *hp;
+
+	mipi_dsi_buf_reserve_hdr(dp, DSI_HOST_HDR_SIZE);
+	hp = dp->hdr;
+	*hp = 0;
+	*hp |= DSI_HDR_VC(cm->vc);
+	*hp |= DSI_HDR_DTYPE(DTYPE_VSYNC_START);
+	if (cm->last)
+		*hp |= DSI_HDR_LAST;
+	mipi_dsi_buf_push(dp, DSI_HOST_HDR_SIZE);
+
+	return dp->len;	/* 4 bytes */
+}
+
+static int mipi_dsi_hsync_start(struct dsi_buf *dp, struct dsi_cmd_desc *cm)
+{
+	uint32 *hp;
+
+	mipi_dsi_buf_reserve_hdr(dp, DSI_HOST_HDR_SIZE);
+	hp = dp->hdr;
+	*hp = 0;
+	*hp |= DSI_HDR_VC(cm->vc);
+	*hp |= DSI_HDR_DTYPE(DTYPE_HSYNC_START);
+	if (cm->last)
+		*hp |= DSI_HDR_LAST;
+	mipi_dsi_buf_push(dp, DSI_HOST_HDR_SIZE);
+
+	return dp->len;	/* 4 bytes */
+}
+
+/*
+ * prepare cmd buffer to be txed
+ */
 int mipi_dsi_cmd_dma_add(struct dsi_buf *dp, struct dsi_cmd_desc *cm)
 {
 	int len = 0;
@@ -768,6 +805,12 @@ int mipi_dsi_cmd_dma_add(struct dsi_buf *dp, struct dsi_cmd_desc *cm)
 		break;
 	case DTYPE_PERIPHERAL_OFF:
 		len = mipi_dsi_peripheral_off(dp, cm);
+		break;
+	case DTYPE_VSYNC_START:
+		len = mipi_dsi_vsync_start(dp, cm);
+		break;
+	case DTYPE_HSYNC_START:
+		len = mipi_dsi_hsync_start(dp, cm);
 		break;
 	default:
 		pr_debug("%s: dtype=%x NOT supported\n",
