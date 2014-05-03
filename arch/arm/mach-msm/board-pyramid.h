@@ -26,7 +26,7 @@
 #define MSM_RAM_CONSOLE_SIZE	MSM_HTC_RAM_CONSOLE_SIZE
 
 /* Memory map */
-#define MSM_ION_HEAP_NUM      7
+#define MSM_ION_HEAP_NUM      6
 
 #define MSM_FB_SIZE           roundup((960 * ALIGN(540, 32) * 4 * 3), 4096)
 #define MSM_SMI_SIZE          0x3900000
@@ -34,7 +34,7 @@
 #define USER_SMI_SIZE         (MSM_SMI_SIZE - KERNEL_SMI_SIZE)
 #define MSM_PMEM_ADSP_SIZE    0x1800000
 #define MSM_ION_WB_SIZE       0x300000
-#define MSM_ION_AUDIO_SIZE    0x4CF000
+#define MSM_PMEM_AUDIO_SIZE   0x300000
 #define MSM_ION_SF_SIZE       0x2A00000
 #define MSM_ION_MM_FW_SIZE    0x200000
 #define MSM_ION_MM_SIZE       0x3400000
@@ -48,7 +48,7 @@
 #define MSM_ION_MFC_BASE      0x3B600000
 #define MSM_FB_BASE           0x3B900000
 #define MSM_ION_SF_BASE       0x40400000
-#define MSM_ION_AUDIO_BASE    0x45C00000
+#define MSM_PMEM_AUDIO_BASE   0x46400000
 #define MSM_ION_WB_BASE       0x46400000
 #define MSM_PMEM_ADSP_BASE    0x49800000
 
@@ -88,11 +88,8 @@
 
 #define GPIO_LCD_TE        (28)
 /* Audio */
-#define PYRAMID_AUD_CODEC_RST		(67)
-#define PYRAMID_AUD_CDC_LDO_SEL		(116)
-//#define PYRAMID_AUD_MIC_SEL		PMGPIO(14)
-#define PYRAMID_AUD_SPK_ENO		PMGPIO(19)
-#define PYRAMID_AUD_HANDSET_ENO		PMGPIO(18)
+#define PYRAMID_AUD_CODEC_RST        (67)
+
 /* BT */
 #define PYRAMID_GPIO_BT_HOST_WAKE      (45)
 #define PYRAMID_GPIO_BT_UART1_TX       (53)

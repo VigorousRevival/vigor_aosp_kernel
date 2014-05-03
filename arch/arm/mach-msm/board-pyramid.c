@@ -1890,6 +1890,15 @@ static int __init pmem_adsp_size_setup(char *p)
 }
 early_param("pmem_adsp_size", pmem_adsp_size_setup);
 
+static unsigned pmem_audio_size = MSM_PMEM_AUDIO_SIZE;
+
+static int __init pmem_audio_size_setup(char *p)
+{
+	pmem_audio_size = memparse(p, NULL);
+	return 0;
+}
+early_param("pmem_audio_size", pmem_audio_size_setup);
+
 static struct android_pmem_platform_data android_pmem_adsp_pdata = {
 	.name = "pmem_adsp",
 	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
@@ -1900,6 +1909,18 @@ static struct platform_device android_pmem_adsp_device = {
 	.name = "android_pmem",
 	.id = 2,
 	.dev = { .platform_data = &android_pmem_adsp_pdata },
+};
+
+static struct android_pmem_platform_data android_pmem_audio_pdata = {
+	.name = "pmem_audio",
+	.allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
+	.cached = 0,
+};
+
+static struct platform_device android_pmem_audio_device = {
+	.name = "android_pmem",
+	.id = 4,
+	.dev = { .platform_data = &android_pmem_audio_pdata },
 };
 
 #define PMEM_BUS_WIDTH(_bw) \
@@ -2036,15 +2057,6 @@ static struct ion_platform_heap pyramid_heaps[] = {
 		.name	= ION_SF_HEAP_NAME,
 		.base	= MSM_ION_SF_BASE,
 		.size	= MSM_ION_SF_SIZE,
-		.memory_type = ION_EBI_TYPE,
-		.extra_data = (void *) &co_ion_pdata,
-	},
-	{
-		.id	= ION_AUDIO_HEAP_ID,
-		.type	= ION_HEAP_TYPE_CARVEOUT,
-		.name	= ION_AUDIO_HEAP_NAME,
-		.base	= MSM_ION_AUDIO_BASE,
-		.size	= MSM_ION_AUDIO_SIZE,
 		.memory_type = ION_EBI_TYPE,
 		.extra_data = (void *) &co_ion_pdata,
 	},
@@ -3380,6 +3392,7 @@ static struct platform_device *pyramid_devices[] __initdata = {
 #endif
 #ifdef CONFIG_ANDROID_PMEM
 	&android_pmem_adsp_device,
+	&android_pmem_audio_device,
 	&android_pmem_smipool_device,
 #endif
 #ifdef CONFIG_MSM_ROTATOR
@@ -3493,6 +3506,7 @@ static void __init size_pmem_devices(void)
 {
 	size_pmem_device(&android_pmem_adsp_pdata, MSM_PMEM_ADSP_BASE, pmem_adsp_size);
 	size_pmem_device(&android_pmem_smipool_pdata, USER_SMI_BASE, USER_SMI_SIZE);
+	size_pmem_device(&android_pmem_audio_pdata, MSM_PMEM_AUDIO_BASE, MSM_PMEM_AUDIO_SIZE);
 }
 
 static void __init reserve_memory_for(struct android_pmem_platform_data *p)
@@ -3510,6 +3524,7 @@ static void __init reserve_pmem_memory(void)
 {
 	reserve_memory_for(&android_pmem_adsp_pdata);
 	reserve_memory_for(&android_pmem_smipool_pdata);
+	reserve_memory_for(&android_pmem_audio_pdata);
 }
 
 static void __init reserve_ion_memory(void)
@@ -6297,9 +6312,10 @@ static void __init msm8x60_init(struct msm_board_data *board_data)
 
 	platform_device_register(&smsc911x_device);
 
-	//msm_pm_set_platform_data(msm_pm_data, ARRAY_SIZE(msm_pm_data));
+	msm_pm_set_platform_data(msm_pm_data, ARRAY_SIZE(msm_pm_data));
 	msm_pm_set_rpm_wakeup_irq(RPM_SCSS_CPU0_WAKE_UP_IRQ);
-
+	msm_cpuidle_set_states(msm_cstates, ARRAY_SIZE(msm_cstates),
+				msm_pm_data);
 	BUG_ON(msm_pm_boot_init(MSM_PM_BOOT_CONFIG_TZ, NULL));
 
 	pm8058_gpios_init();

@@ -92,6 +92,13 @@ void msm_pm_set_rpm_wakeup_irq(unsigned int irq);
 static inline void msm_pm_set_rpm_wakeup_irq(unsigned int irq) {}
 #endif
 
+#ifdef CONFIG_MSM_PM8X60
+int msm_pm_wait_cpu_shutdown(unsigned int cpu);
+bool msm_pm_verify_cpu_pc(unsigned int cpu);
+#else
+static inline int msm_pm_wait_cpu_shutdown(unsigned int cpu) { return 0; }
+static inline bool msm_pm_verify_cpu_pc(unsigned int cpu) { return true; }
+#endif
 
 #ifdef CONFIG_HOTPLUG_CPU
 int msm_platform_secondary_init(unsigned int cpu);

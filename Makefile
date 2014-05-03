@@ -373,9 +373,11 @@ KBUILD_CPPFLAGS := -D__KERNEL__
 
 KBUILD_CFLAGS   := -Wall -Wundef -Wno-unused-variable -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
-		   -Werror-implicit-function-declaration \
+		   -Wno-implicit-function-declaration \
 		   -Wno-format-security \
-		   -fno-delete-null-pointer-checks
+		   -fno-delete-null-pointer-checks \
+		   -Wno-return-type \
+		   -Wno-unused-function 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL := -mtune=cortex-a8 -march=armv7-a -mfpu=neon
 KBUILD_AFLAGS   := -D__ASSEMBLY__
@@ -585,9 +587,6 @@ endif
 # This warning generated too much noise in a regular build.
 # Use make W=1 to enable this warning (see scripts/Makefile.build)
 KBUILD_CFLAGS += $(call cc-disable-warning, unused-but-set-variable)
-KBUILD_CFLAGS += $(call cc-disable-warning, uninitialized)
-KBUILD_CFLAGS += $(call cc-disable-warning, array-bounds)
-KBUILD_CFLAGS += $(call cc-disable-warning, unused-value)
 
 ifdef CONFIG_FRAME_POINTER
 KBUILD_CFLAGS	+= -fno-omit-frame-pointer -fno-optimize-sibling-calls

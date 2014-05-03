@@ -93,7 +93,15 @@ int board_mfg_mode(void);
  * Sleep Modes and Parameters
  *****************************************************************************/
 
+static struct msm_pm_platform_data *msm_pm_modes;
 static int rpm_cpu0_wakeup_irq;
+
+void __init msm_pm_set_platform_data(
+	struct msm_pm_platform_data *data, int count)
+{
+	BUG_ON(MSM_PM_SLEEP_MODE_NR * num_possible_cpus() > count);
+	msm_pm_modes = data;
+}
 
 void __init msm_pm_set_rpm_wakeup_irq(unsigned int irq)
 {

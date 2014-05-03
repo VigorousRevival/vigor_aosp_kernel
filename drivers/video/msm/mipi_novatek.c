@@ -465,11 +465,11 @@ static void mipi_novatek_set_backlight(struct msm_fb_data_type *mfd)
 {
 	struct dcs_cmd_req cmdreq;
 
-//	if (mipi_novatek_pdata &&
-//	    mipi_novatek_pdata->gpio_set_backlight) {
-//		mipi_novatek_pdata->gpio_set_backlight(mfd->bl_level);
-//		return;
-//	}
+	if (mipi_novatek_pdata &&
+	    mipi_novatek_pdata->gpio_set_backlight) {
+		mipi_novatek_pdata->gpio_set_backlight(mfd->bl_level);
+		return;
+	}
 
 	if ((mipi_novatek_pdata->enable_wled_bl_ctrl)
 	    && (wled_trigger_initialized)) {
