@@ -363,7 +363,7 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 			unsigned long cur_nice_jiffies;
 
 			cur_nice = kstat_cpu(j).cpustat.nice -
-					 j_dbs_info->prev_cpu_nice);
+					 j_dbs_info->prev_cpu_nice;
 			/*
 			 * Assumption: nice time between sampling periods will
 			 * be less than 2^32 jiffies for 32 bit sys
