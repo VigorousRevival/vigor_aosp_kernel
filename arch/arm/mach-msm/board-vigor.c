@@ -10,7 +10,6 @@
  * GNU General Public License for more details.
  *
  */
-#define HASTIMPANI 0
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
 #include <linux/gpio.h>
@@ -43,12 +42,9 @@
 #include <linux/smsc911x.h>
 #include <linux/spi/spi.h>
 #include <linux/input/tdisc_shinetsu.h>
-#include <linux/input/cy8c_ts.h>
-#include <linux/cyttsp.h>
 #include <linux/i2c/isa1200.h>
 #include <linux/dma-mapping.h>
 #include <linux/i2c/bq27520.h>
-#include <linux/cy8c_tma_ts.h>
 #include "sysinfo-8x60.h"
 
 #ifdef CONFIG_ANDROID_PMEM
@@ -3247,6 +3243,12 @@ static struct ion_platform_data ion_pdata = {
         .heaps = vigor_heaps,
 };
 
+static struct platform_device ion_dev = {
+	.name = "ion-msm",
+	.id = 1,
+	.dev = { .platform_data = &ion_pdata },
+};
+
 #ifdef CONFIG_FB_MSM_HDMI_MSM_PANEL
 static struct resource hdmi_msm_resources[] = {
 	{
@@ -3287,12 +3289,16 @@ static struct platform_device hdmi_msm_device = {
 	.resource = hdmi_msm_resources,
 	.dev.platform_data = &hdmi_msm_data,
 };
+
+static struct platform_device *hdmi_devices[] __initdata = {
+	&hdmi_msm_device,
+};
 #endif /* CONFIG_FB_MSM_HDMI_MSM_PANEL */
 
 static struct android_pmem_platform_data android_pmem_smipool_pdata = {
         .name = "pmem_smipool",
         .allocator_type = PMEM_ALLOCATORTYPE_BITMAP,
-        .cached = 0,
+        .cached = 1,
         .memory_type = MEMTYPE_SMI,
         .request_region = pmem_request_smi_region,
         .release_region = pmem_release_smi_region,

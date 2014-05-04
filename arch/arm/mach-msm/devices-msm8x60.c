@@ -763,7 +763,7 @@ static struct msm_bus_vectors grp3d_low_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_3D,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(990),
+		.ib = KGSL_CONVERT_TO_MBPS(1920),		//240 MHz BUS for 228 MHz GPU
 	},
 };
 
@@ -772,7 +772,7 @@ static struct msm_bus_vectors grp3d_nominal_low_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_3D,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(1300),
+		.ib = KGSL_CONVERT_TO_MBPS(2240),		//280 MHz BUS for 266 MHz GPU
 	},
 };
 
@@ -782,7 +782,7 @@ static struct msm_bus_vectors grp3d_nominal_high_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_3D,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(2133),
+		.ib = KGSL_CONVERT_TO_MBPS(2496),		//312 MHz BUS for 300 MHz GPU
 	},
 };
 
@@ -791,7 +791,7 @@ static struct msm_bus_vectors grp3d_max_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_3D,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(2560),
+		.ib = KGSL_CONVERT_TO_MBPS(2688),		//336 MHz BUS for 320 MHz GPU
 	},
 };
 #else
@@ -858,7 +858,7 @@ static struct msm_bus_vectors grp2d0_nominal_low_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE0,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(990),
+		.ib = KGSL_CONVERT_TO_MBPS(1664),   	//208MHz bus for 200MHz GPU
 	},
 };
 
@@ -867,7 +867,7 @@ static struct msm_bus_vectors grp2d0_nominal_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE0,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(990),
+		.ib = KGSL_CONVERT_TO_MBPS(1856), 		//232 MHz bus for 228MHz GPU
 	},
 };
 
@@ -876,7 +876,7 @@ static struct msm_bus_vectors grp2d0_max_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE0,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(1320),
+		.ib = KGSL_CONVERT_TO_MBPS(2176), 		//272 mhz bus for 266MHz GPU
 	},
 };
 #else
@@ -898,7 +898,7 @@ static struct msm_bus_paths grp2d0_bus_scale_usecases[] = {
 #ifdef CONFIG_GPU_OVERCLOCK	
 	{
 		ARRAY_SIZE(grp2d0_nominal_low_vectors),
-		grp2d0_nominal_low_vectors,
+		grp2d0_nominal_vectors,
 	},
 	{
 		ARRAY_SIZE(grp2d0_nominal_vectors),
@@ -932,7 +932,7 @@ static struct msm_bus_vectors grp2d1_nominal_low_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE1,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(990),
+		.ib = KGSL_CONVERT_TO_MBPS(1664),   	//208 MHz bus for 200MHz GPU
 	},
 };
 
@@ -941,7 +941,7 @@ static struct msm_bus_vectors grp2d1_nominal_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE1,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(990),
+		.ib = KGSL_CONVERT_TO_MBPS(1856), 		//232 MHz bus for 228MHz GPU
 	},
 };
 
@@ -950,7 +950,7 @@ static struct msm_bus_vectors grp2d1_max_vectors[] = {
 		.src = MSM_BUS_MASTER_GRAPHICS_2D_CORE1,
 		.dst = MSM_BUS_SLAVE_EBI_CH0,
 		.ab = 0,
-		.ib = KGSL_CONVERT_TO_MBPS(1320),
+		.ib = KGSL_CONVERT_TO_MBPS(2176), 		//272 mhz bus for 266MHz GPU
 	},
 };
 #else
@@ -972,7 +972,7 @@ static struct msm_bus_paths grp2d1_bus_scale_usecases[] = {
 #ifdef CONFIG_GPU_OVERCLOCK	
 	{
 		ARRAY_SIZE(grp2d1_nominal_low_vectors),
-		grp2d1_nominal_low_vectors,
+		grp2d1_nominal_vectors,
 	},
 	{
 		ARRAY_SIZE(grp2d1_nominal_vectors),
@@ -1031,19 +1031,19 @@ static struct kgsl_device_platform_data kgsl_3d0_pdata = {
 			.io_fraction = 0,
 		},
 		{
-			.gpu_freq = 266667000,
+			.gpu_freq = 300000000,
 			.bus_freq = 3,
 			.io_fraction = 0,
 		},
 #else
 		{
 			.gpu_freq = 266667000,
-			.bus_freq = 4,
+			.bus_freq = 2,
 			.io_fraction = 0,
 		},
 		{
 			.gpu_freq = 228571000,
-			.bus_freq = 3,
+			.bus_freq = 1,
 			.io_fraction = 33,
 		},
 #endif
@@ -1103,6 +1103,10 @@ static struct kgsl_device_platform_data kgsl_2d0_pdata = {
 #ifdef CONFIG_GPU_OVERCLOCK
 		{
 			.gpu_freq = 266667000,
+			.bus_freq = 4,
+		},
+		{
+			.gpu_freq = 228571000,
 			.bus_freq = 3,
 		},
 		{
@@ -1114,7 +1118,7 @@ static struct kgsl_device_platform_data kgsl_2d0_pdata = {
 			.bus_freq = 1,
 		},
 		{
-			.gpu_freq = 160000000,
+			.gpu_freq = 145455000,
 			.bus_freq = 0,
 		},
 #else
@@ -1128,15 +1132,15 @@ static struct kgsl_device_platform_data kgsl_2d0_pdata = {
 		},
 #endif
 	},
-	.init_level = 0,
+	.init_level = 2,
 #ifdef CONFIG_GPU_OVERCLOCK
-	.num_levels = 4,
+	.num_levels = 5,
 #else
 	.num_levels = 2,
 #endif
 	.set_grp_async = NULL,
-	.idle_timeout = HZ/10,
-	.nap_allowed = true,
+	.idle_timeout = HZ/5,
+	.nap_allowed = false,
 	.clk_map = KGSL_CLK_CORE | KGSL_CLK_IFACE,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.bus_scale_table = &grp2d0_bus_scale_pdata,
@@ -1173,6 +1177,10 @@ static struct kgsl_device_platform_data kgsl_2d1_pdata = {
 #ifdef CONFIG_GPU_OVERCLOCK
 		{
 			.gpu_freq = 266667000,
+			.bus_freq = 4,
+		},
+		{
+			.gpu_freq = 228571000,
 			.bus_freq = 3,
 		},
 		{
@@ -1184,7 +1192,7 @@ static struct kgsl_device_platform_data kgsl_2d1_pdata = {
 			.bus_freq = 1,
 		},
 		{
-			.gpu_freq = 160000000,
+			.gpu_freq = 145455000,
 			.bus_freq = 0,
 		},
 #else
@@ -1198,15 +1206,15 @@ static struct kgsl_device_platform_data kgsl_2d1_pdata = {
 		},
 #endif
 	},
-	.init_level = 0,
+	.init_level = 2,
 #ifdef CONFIG_GPU_OVERCLOCK
-	.num_levels = 4,
+	.num_levels = 5,
 #else
 	.num_levels = 2,
 #endif
 	.set_grp_async = NULL,
-	.idle_timeout = HZ/10,
-	.nap_allowed = true,
+	.idle_timeout = HZ/5,
+	.nap_allowed = false,
 	.clk_map = KGSL_CLK_CORE | KGSL_CLK_IFACE,
 #ifdef CONFIG_MSM_BUS_SCALING
 	.bus_scale_table = &grp2d1_bus_scale_pdata,
@@ -1863,6 +1871,7 @@ struct msm_camera_platform_info vpe_info = {
 	.num_clks = ARRAY_SIZE(vpe_clk_info),
 };
 
+
 struct platform_device msm8x60_device_csic0 = {
 	.name           = "msm_csic",
 	.id             = 0,
@@ -1902,7 +1911,9 @@ struct platform_device msm8x60_device_vpe = {
 			.platform_data = &vpe_info,
 	},
 };
+
 #endif
+
 
 #define MIPI_DSI_HW_BASE	0x04700000
 #define ROTATOR_HW_BASE		0x04E00000
@@ -1925,7 +1936,7 @@ static struct resource msm_mipi_dsi_resources[] = {
 
 static struct platform_device msm_mipi_dsi_device = {
 	.name   = "mipi_dsi",
-	.id     = 1,
+	.id     = 0,
 	.num_resources  = ARRAY_SIZE(msm_mipi_dsi_resources),
 	.resource       = msm_mipi_dsi_resources,
 };
@@ -2338,7 +2349,6 @@ struct platform_device msm_device_hsusb_host = {
 		.coherent_dma_mask	= 0xffffffffULL,
 	},
 };
-
 #ifdef CONFIG_USB_EHCI_MSM_72K
 static struct platform_device *msm_host_devices[] = {
 	&msm_device_hsusb_host,
