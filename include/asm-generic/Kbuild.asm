@@ -14,8 +14,10 @@ header-y += a.out.h
 endif
 
 header-y += auxvec.h
+header-y += bitops.h
 header-y += bitsperlong.h
 header-y += byteorder.h
+header-y += current.h
 header-y += errno.h
 header-y += fcntl.h
 header-y += ioctl.h
@@ -41,5 +43,6 @@ header-y += statfs.h
 header-y += swab.h
 header-y += termbits.h
 header-y += termios.h
+header-y += thread_info.h
 header-y += types.h
 header-y += unistd.h
