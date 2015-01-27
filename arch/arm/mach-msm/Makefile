@@ -4,6 +4,7 @@ obj-y += frandom.o
 obj-y += io.o dma.o memory.o timer.o
 obj-y += clock.o clock-voter.o clock-dummy.o
 obj-y += subsystem_map.o
+obj-y += emmc_partitions.o
 obj-$(CONFIG_CPU_FREQ_MSM) += cpufreq.o
 obj-$(CONFIG_MSM_MPDEC) += msm_mpdecision.o
 obj-$(CONFIG_DEBUG_FS) += nohlt.o clock-debug.o
@@ -116,9 +117,6 @@ endif
 endif
 endif
 endif
-endif
-ifdef CONFIG_ARCH_MSM8960
-	obj-y += emmc_partitions.o
 endif
 ifdef CONFIG_MACH_PICO
         obj-y += nand_partitions.o

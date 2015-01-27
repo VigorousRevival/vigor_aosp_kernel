@@ -89,6 +89,9 @@ struct mmc_platform_data;
 int __init msm_add_sdcc_devices(unsigned int controller, struct mmc_platform_data *plat);
 int __init msm_add_serial_devices(unsigned uart);
 
+extern int get_partition_num_by_name(char *name);
+extern const char *get_partition_name_by_num(int partnum);
+
 #if defined(CONFIG_USB_FUNCTION_MSM_HSUSB)
 /* START: add USB connected notify function */
 struct t_usb_status_notifier{
