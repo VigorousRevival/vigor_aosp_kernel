@@ -36,6 +36,7 @@ header-y += shmbuf.h
 header-y += sigcontext.h
 header-y += siginfo.h
 header-y += signal.h
+header-y += sizes.h
 header-y += socket.h
 header-y += sockios.h
 header-y += stat.h
